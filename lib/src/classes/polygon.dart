@@ -101,8 +101,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
       final transformedRing = <List<double>>[];
 
       for (final point in ring) {
-        final List<double> transformedPoint =
-            convertToWebMercator(point[0], point[1]);
+        final List<double> transformedPoint = convertToWebMercator(point[0], point[1]);
         transformedRing.add(transformedPoint);
       }
 
@@ -122,7 +121,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
       cy += (y1 + y2) * f;
     }
     double a = getPlanarArea(outer) * 6;
-    var c = convertFromWebMercator(cy.abs() / a, cx.abs() / a);
+    var c = convertFromWebMercator(cy / a, cx / a);
     return c;
   }
 
@@ -139,8 +138,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
       final transformedRing = <List<double>>[];
 
       for (final point in ring) {
-        final List<double> transformedPoint =
-            convertToWebMercator(point[0], point[1]);
+        final List<double> transformedPoint = convertToWebMercator(point[0], point[1]);
         transformedRing.add(transformedPoint);
       }
 
@@ -150,11 +148,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
     bool inside = false;
     for (int i = 0, j = outer.length - 1; i < outer.length; j = i++) {
       if (((outer[i][1] > pt[1]) != (outer[j][1] > pt[1])) &&
-          (pt[0] <
-              (outer[j][0] - outer[i][0]) *
-                      (pt[1] - outer[i][1]) /
-                      (outer[j][1] - outer[i][1]) +
-                  outer[i][0])) {
+          (pt[0] < (outer[j][0] - outer[i][0]) * (pt[1] - outer[i][1]) / (outer[j][1] - outer[i][1]) + outer[i][0])) {
         inside = !inside;
       }
     }
@@ -202,8 +196,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
   List<double> optimalPointInside({double resolution = 2.0}) {
     // Calculate the distance between two points in WebMercator coordinates
     double distance(List<double> point1, List<double> point2) {
-      return sqrt(
-          pow(point1[0] - point2[0], 2) + pow(point1[1] - point2[1], 2));
+      return sqrt(pow(point1[0] - point2[0], 2) + pow(point1[1] - point2[1], 2));
     }
 
     /// Calculates the perpendicular distance from a point to a line segment.
@@ -215,16 +208,13 @@ class GeoJSONPolygon implements GeoJSONGeometry {
     /// [lineStart] and [lineEnd] define the line segment's endpoints.
     ///
     /// Returns the perpendicular distance as a double.
-    double perpendicularDistance(
-        List<double> point, List<double> lineStart, List<double> lineEnd) {
+    double perpendicularDistance(List<double> point, List<double> lineStart, List<double> lineEnd) {
       double dx = lineEnd[0] - lineStart[0];
       double dy = lineEnd[1] - lineStart[1];
       if (dx == 0 && dy == 0) {
         return distance(point, lineStart);
       }
-      double t =
-          ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) /
-              (dx * dx + dy * dy);
+      double t = ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) / (dx * dx + dy * dy);
       t = max(0, min(1, t));
       double nearestPointX = lineStart[0] + t * dx;
       double nearestPointY = lineStart[1] + t * dy;
@@ -236,8 +226,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
       final transformedRing = <List<double>>[];
 
       for (final point in ring) {
-        final List<double> transformedPoint =
-            convertToWebMercator(point[0], point[1]);
+        final List<double> transformedPoint = convertToWebMercator(point[0], point[1]);
         transformedRing.add(transformedPoint);
       }
 
@@ -262,8 +251,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
     for (int i = 0; i <= gridSize; i++) {
       for (int j = 0; j <= gridSize; j++) {
         List<double> gridPoint = [minX + i * deltaX, minY + j * deltaY];
-        var gridPointLonLat =
-            convertFromWebMercator(gridPoint.first, gridPoint.last);
+        var gridPointLonLat = convertFromWebMercator(gridPoint.first, gridPoint.last);
         if (isPointInsideComplex(gridPointLonLat)) {
           double minDistance = double.infinity;
           // Calculate the distance from the point to each edge of the outer polygon and the holes
@@ -271,8 +259,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
             for (int k = 0; k < polygon.length; k++) {
               List<double> currentVertex = polygon[k];
               List<double> nextVertex = polygon[(k + 1) % polygon.length];
-              double distance =
-                  perpendicularDistance(gridPoint, currentVertex, nextVertex);
+              double distance = perpendicularDistance(gridPoint, currentVertex, nextVertex);
               if (distance < minDistance) {
                 minDistance = distance;
               }
@@ -290,18 +277,14 @@ class GeoJSONPolygon implements GeoJSONGeometry {
   }
 
   /// The constructor for the [coordinates] member
-  GeoJSONPolygon(this.coordinates)
-      : assert(coordinates.isNotEmpty,
-            'The coordinates MUST be one or more elements');
+  GeoJSONPolygon(this.coordinates) : assert(coordinates.isNotEmpty, 'The coordinates MUST be one or more elements');
 
   /// The constructor from map
   factory GeoJSONPolygon.fromMap(Map<String, dynamic> map) {
     assert(map.containsKey('type'), 'There MUST be contains key `type`');
     assert(['Polygon'].contains(map['type']), 'Invalid type');
-    assert(map.containsKey('coordinates'),
-        'There MUST be contains key `coordinates`');
-    assert(map['coordinates'] is List,
-        'There MUST be array of linear ring coordinate arrays.');
+    assert(map.containsKey('coordinates'), 'There MUST be contains key `coordinates`');
+    assert(map['coordinates'] is List, 'There MUST be array of linear ring coordinate arrays.');
     final llll = map['coordinates'];
     final coords = <List<List<double>>>[];
     llll.forEach((lll) {
@@ -319,8 +302,7 @@ class GeoJSONPolygon implements GeoJSONGeometry {
   }
 
   /// The constructor from JSON string
-  factory GeoJSONPolygon.fromJSON(String source) =>
-      GeoJSONPolygon.fromMap(json.decode(source));
+  factory GeoJSONPolygon.fromJSON(String source) => GeoJSONPolygon.fromMap(json.decode(source));
 
   @override
   Map<String, dynamic> toMap() {
