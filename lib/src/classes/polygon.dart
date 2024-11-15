@@ -101,7 +101,8 @@ class GeoJSONPolygon implements GeoJSONGeometry {
       final transformedRing = <List<double>>[];
 
       for (final point in ring) {
-        final List<double> transformedPoint = convertToWebMercator(point[0], point[1]);
+        final List<double> transformedPoint = convertToWebMercator(
+            point[0], point[1]); // Assicurati che point[0] sia la longitudine e point[1] la latitudine
         transformedRing.add(transformedPoint);
       }
 
@@ -109,19 +110,23 @@ class GeoJSONPolygon implements GeoJSONGeometry {
     }
     var outer = coords.first;
     var n = outer.length;
-    double cx = 0;
-    double cy = 0;
+    double signedArea = 0.0;
+    double cx = 0.0;
+    double cy = 0.0;
     for (int i = 0; i < n; i++) {
-      double x1 = outer[i][0]; // Corretto: x1
-      double y1 = outer[i][1]; // Corretto: y1
-      double x2 = outer[(i + 1) % n][0]; // Corretto: x2
-      double y2 = outer[(i + 1) % n][1]; // Corretto: y2
-      double f = x1 * y2 - x2 * y1;
-      cx += (x1 + x2) * f;
-      cy += (y1 + y2) * f;
+      double x0 = outer[i][0];
+      double y0 = outer[i][1];
+      double x1 = outer[(i + 1) % n][0];
+      double y1 = outer[(i + 1) % n][1];
+      double a = x0 * y1 - x1 * y0;
+      signedArea += a;
+      cx += (x0 + x1) * a;
+      cy += (y0 + y1) * a;
     }
-    double a = getPlanarArea(outer) * 6;
-    var c = convertFromWebMercator(cx / a, cy / a); // Corretto: ordine dei parametri
+    signedArea *= 0.5;
+    cx /= (6.0 * signedArea);
+    cy /= (6.0 * signedArea);
+    var c = convertFromWebMercator(cx, cy);
     return c;
   }
 
