@@ -112,16 +112,16 @@ class GeoJSONPolygon implements GeoJSONGeometry {
     double cx = 0;
     double cy = 0;
     for (int i = 0; i < n; i++) {
-      double x1 = outer[i][1];
-      double y1 = outer[i][0];
-      double x2 = outer[(i + 1) % n][1];
-      double y2 = outer[(i + 1) % n][0];
+      double x1 = outer[i][0]; // Corretto: x1
+      double y1 = outer[i][1]; // Corretto: y1
+      double x2 = outer[(i + 1) % n][0]; // Corretto: x2
+      double y2 = outer[(i + 1) % n][1]; // Corretto: y2
       double f = x1 * y2 - x2 * y1;
       cx += (x1 + x2) * f;
       cy += (y1 + y2) * f;
     }
     double a = getPlanarArea(outer) * 6;
-    var c = convertFromWebMercator(cy / a, cx / a);
+    var c = convertFromWebMercator(cx / a, cy / a); // Corretto: ordine dei parametri
     return c;
   }
 
